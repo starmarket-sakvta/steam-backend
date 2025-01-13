@@ -6,7 +6,7 @@ const port = 3000;
 
 // Configure Relying Party
 const relyingParty = new RelyingParty(
-    'http://192.168.1.105:3000/callback', // Change this in production
+    'http://https://steam-backend-szpi.onrender.com/callback', // Change this in production
     null,
     true,
     false,
