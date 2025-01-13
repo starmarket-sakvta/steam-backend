@@ -6,11 +6,11 @@ const port = 3000;
 
 // Configure Relying Party
 const relyingParty = new RelyingParty(
-    'http://192.168.1.105:3000/callback', // Return URL
-    null, // Realm (optional)
-    true, // Use stateless verification
-    false, // Strict mode
-    [] // Extensions (optional)
+    'http://192.168.1.105:3000/callback', // Change this in production
+    null,
+    true,
+    false,
+    []
 );
 
 // Login Route
@@ -39,6 +39,7 @@ app.get('/callback', (req, res) => {
     });
 });
 
+// Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
