@@ -28,15 +28,14 @@ app.get('/login', (req, res) => {
 });
 
 // Callback Route
-// Callback Route - Return Only Steam ID
 app.get('/callback', (req, res) => {
     relyingParty.verifyAssertion(req, (error, result) => {
         if (error || !result.authenticated) {
-            return res.status(500).json({ error: 'Verification failed' });
+            return res.status(500).send('Verification failed');
         }
 
         const steamId = result.claimedIdentifier.split('/').pop();
-        res.json('${steamId}'); // ✅ Send only the Steam ID as JSON
+        res.send(`${steamId}`);
     });
 });
 
