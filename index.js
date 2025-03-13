@@ -36,7 +36,7 @@ app.get('/callback', (req, res) => {
         }
 
         const steamId = result.claimedIdentifier.split('/').pop();
-        res.json({ steamId }); // ✅ Send only the Steam ID as JSON
+        res.json('${steamId}'); // ✅ Send only the Steam ID as JSON
     });
 });
 
