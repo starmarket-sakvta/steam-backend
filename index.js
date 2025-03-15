@@ -83,15 +83,15 @@ app.get('/inventory', async (req, res) => {
         const inventoryUrl = `https://steamcommunity.com/inventory/${req.session.steamId}/730/2?l=english&count=1000`;
         const response = await axios.get(inventoryUrl, {
             headers: {
-                'Cookie': req.session.steamCookies, // ✅ Use stored cookies
+                'Cookie': req.session.steamCookies,
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'Accept': 'application/json, text/javascript, */*; q=0.01',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Referer': `https://steamcommunity.com/profiles/${req.session.steamId}`,
+                'Referer': `https://steamcommunity.com/inventory/${req.session.steamId}/730/2?l=english&count=1000`,
                 'Connection': 'keep-alive',
             },
-            withCredentials: true, // ✅ Ensure cookies are sent
+            withCredentials: true,
         });
 
         console.log("✅ Inventory fetched successfully!");
@@ -101,6 +101,7 @@ app.get('/inventory', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch inventory" });
     }
 });
+
 
 
 
