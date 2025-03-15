@@ -30,18 +30,18 @@ app.get('/login', (req, res) => {
         false,
         (error, authUrl) => {
             if (error) {
-                return res.status(500).send('Authentication failed');
+                return res.status(500).json({ error: 'Authentication failed' });
             }
             res.redirect(authUrl);
         }
     );
 });
 
-// Callback Route - Store Steam ID and Cookies
+// Callback Route - Return Steam ID to Flutter
 app.get('/callback', (req, res) => {
     relyingParty.verifyAssertion(req, async (error, result) => {
         if (error || !result.authenticated) {
-            return res.status(500).send('Verification failed');
+            return res.status(500).json({ error: "Verification failed" });
         }
 
         const steamId = result.claimedIdentifier.split('/').pop();
@@ -49,28 +49,21 @@ app.get('/callback', (req, res) => {
         // Store Steam ID in session
         req.session.steamId = steamId;
 
-        // Fetch Steam session cookies (workaround)
-        try {
-            const steamResponse = await axios.get(`https://steamcommunity.com/profiles/${steamId}`, { withCredentials: true });
-            req.session.steamCookies = steamResponse.headers['set-cookie'];  // Store session cookies
-        } catch (err) {
-            return res.status(500).send('Failed to get session cookies');
-        }
-
-        res.redirect('/inventory');
+        // Return JSON response with Steam ID
+        res.json({ steamId: steamId });
     });
 });
 
 // Private Inventory Route
 app.get('/inventory', async (req, res) => {
-    if (!req.session.steamId || !req.session.steamCookies) {
+    if (!req.session.steamId) {
         return res.status(401).json({ error: "Not logged in" });
     }
 
     try {
         const inventoryUrl = `https://steamcommunity.com/inventory/${req.session.steamId}/730/2?l=english&count=1000`;
         const response = await axios.get(inventoryUrl, {
-            headers: { Cookie: req.session.steamCookies },
+            headers: { Cookie: req.session.steamCookies || '' }, // Use session cookies if available
         });
 
         res.json(response.data);
@@ -82,7 +75,7 @@ app.get('/inventory', async (req, res) => {
 // Logout Route
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.send('Logged out');
+    res.json({ message: 'Logged out' });
 });
 
 // Start the server
