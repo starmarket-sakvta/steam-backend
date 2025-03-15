@@ -17,6 +17,7 @@
     "openid": "^2.0.12",
     "redis": "^4.6.3",
     "openid-client": "^6.1.7",
+    "connect-redis": "^6.1.0",
     "steamcommunity": "^3.44.6"
   }
 }
