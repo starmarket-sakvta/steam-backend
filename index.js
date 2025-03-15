@@ -46,27 +46,28 @@ app.get('/callback', async (req, res) => {
         const steamId = result.claimedIdentifier.split('/').pop();
         req.session.steamId = steamId;
 
-        // 🔹 Fetch Steam Session Cookies
         try {
             const steamLoginResponse = await axios.get(
                 `https://steamcommunity.com/profiles/${steamId}`,
                 { withCredentials: true }
             );
 
-            // Extract cookies from response headers
+            // Extract and store cookies
             const cookies = steamLoginResponse.headers['set-cookie'];
             if (cookies) {
-                req.session.steamCookies = cookies.join('; '); // Store cookies in session
+                req.session.steamCookies = cookies.join('; ');
+                console.log("✅ Stored Steam Cookies:", req.session.steamCookies); // Debugging
+            } else {
+                console.log("⚠️ No cookies received from Steam.");
             }
-
-            console.log("✅ Steam Cookies Stored for", steamId);
         } catch (error) {
             console.error("⚠️ Failed to fetch Steam cookies:", error.message);
         }
 
-        res.send(`${steamId}`); // ✅ This remains unchanged
+        res.send(`${steamId}`);
     });
 });
+
 
 
 
@@ -75,14 +76,17 @@ app.get('/inventory', async (req, res) => {
         return res.status(401).json({ error: "Not logged in" });
     }
 
+    console.log("🛠️ Fetching inventory for:", req.session.steamId);
+    console.log("🔹 Using Steam Cookies:", req.session.steamCookies);
+
     try {
         const inventoryUrl = `https://steamcommunity.com/inventory/${req.session.steamId}/730/2?l=english&count=1000`;
         const response = await axios.get(inventoryUrl, {
             headers: {
-                Cookie: req.session.steamCookies || '',  // ✅ Use stored session cookies
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', // 🛠️ Prevent bot blocking
+                Cookie: req.session.steamCookies || '',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',  // 🛠️ Prevent bot blocking
             },
-            withCredentials: true, // Ensure cookies are sent
+            withCredentials: true,
         });
 
         res.json(response.data);
@@ -91,6 +95,7 @@ app.get('/inventory', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch inventory" });
     }
 });
+
 
 
 // Logout Route
