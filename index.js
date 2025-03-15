@@ -37,22 +37,18 @@ app.get('/login', (req, res) => {
     );
 });
 
-// Callback Route - Return Steam ID to Flutter
+// Callback Route
 app.get('/callback', (req, res) => {
-    relyingParty.verifyAssertion(req, async (error, result) => {
+    relyingParty.verifyAssertion(req, (error, result) => {
         if (error || !result.authenticated) {
-            return res.status(500).json({ error: "Verification failed" });
+            return res.status(500).send('Verification failed');
         }
 
         const steamId = result.claimedIdentifier.split('/').pop();
-        
-        // Store Steam ID in session
-        req.session.steamId = steamId;
-
-        // Return JSON response with Steam ID
-        res.json({ steamId: steamId });
+        res.send(`${steamId}`);
     });
 });
+
 
 // Private Inventory Route
 app.get('/inventory', async (req, res) => {
