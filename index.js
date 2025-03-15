@@ -47,16 +47,15 @@ app.get('/callback', async (req, res) => {
         req.session.steamId = steamId;
 
         try {
-            const steamLoginResponse = await axios.get(
-                `https://steamcommunity.com/profiles/${steamId}`,
-                { withCredentials: true }
-            );
+            const inventoryUrl = `https://steamcommunity.com/inventory/${steamId}/730/2?l=english&count=1`;
+            const steamLoginResponse = await axios.get(inventoryUrl, { withCredentials: true });
 
-            // Extract and store cookies
-            const cookies = steamLoginResponse.headers['set-cookie'];
-            if (cookies) {
-                req.session.steamCookies = cookies.join('; ');
-                console.log("✅ Stored Steam Cookies:", req.session.steamCookies); // Debugging
+            // Extract and clean cookies
+            const rawCookies = steamLoginResponse.headers['set-cookie'];
+            if (rawCookies) {
+                const filteredCookies = rawCookies.map(cookie => cookie.split(';')[0]).join('; '); // ✅ Remove extra attributes
+                req.session.steamCookies = filteredCookies;
+                console.log("✅ Stored Steam Cookies:", req.session.steamCookies);
             } else {
                 console.log("⚠️ No cookies received from Steam.");
             }
@@ -64,9 +63,10 @@ app.get('/callback', async (req, res) => {
             console.error("⚠️ Failed to fetch Steam cookies:", error.message);
         }
 
-        res.send(`${steamId}`);
+        res.send(`${steamId}`); // ✅ Keep this for compatibility
     });
 });
+
 
 
 
