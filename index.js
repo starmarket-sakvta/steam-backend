@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const RedisStore = require('connect-redis').default;
+const RedisStore = require('connect-redis')(session);
 const { createClient } = require('redis');
 const axios = require('axios');
 const { RelyingParty } = require('openid');
