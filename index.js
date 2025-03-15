@@ -1,9 +1,9 @@
-const express = require('express');
-const session = require('express-session');
-const RedisStore = require('connect-redis').default;
+import express from 'express';
+import session from 'express-session';
+import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
-const axios = require('axios');
-const { RelyingParty } = require('openid');
+import axios from 'axios';
+import { RelyingParty } from 'openid';
 
 const app = express();
 const port = 3000;
@@ -22,12 +22,13 @@ const redisClient = createClient({
 redisClient.on('error', err => console.log('Redis Client Error', err));
 
 // Connect to Redis
-redisClient.connect().then(() => console.log("✅ Connected to Redis"));
+await redisClient.connect();
+console.log("✅ Connected to Redis");
 
 // 🔹 Configure Express Session with Redis
 app.use(session({
     store: new RedisStore({ client: redisClient }),
-    secret: 'your-secret-key',  // Change this in production
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }  // Set to true if using HTTPS
