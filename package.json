@@ -16,5 +16,6 @@
     "express-session": "^1.17.3",
     "openid": "^2.0.12",
     "openid-client": "^6.1.7"
+    "steamcommunity": "^3.44.6"
   }
 }
