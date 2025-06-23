@@ -1,45 +1,59 @@
-const express = require('express');
-const { RelyingParty } = require('openid');
+import axios from "axios";
+import qs from "qs";
 
-const app = express();
-const port = 3000;
+const sessionid = "31e9c717f1fe1de0d2b35700";
+const steamLoginSecure = "76561198445539646%7C%7CeyAidHlw..."; // бүрэн cookie тавих
+const partnerSteamID = "76561198848169809"; // 76561197960265728 + 1487904181
+const assetid = "44154786819";
+const tradeToken = "B_8Lt6Te";
 
-// Configure Relying Party
-const relyingParty = new RelyingParty(
-    'http://steam-backend-szpi.onrender.com/callback', // Change this in production
-    null,
-    true,
-    false,
-    []
-);
+const payload = {
+  sessionid: sessionid,
+  serverid: "1",
+  partner: partnerSteamID,
+  tradeoffermessage: "Hi, let's trade!",
+  json_tradeoffer: JSON.stringify({
+    me: {
+      assets: [
+        {
+          appid: 730,
+          contextid: "2",
+          assetid: assetid,
+          amount: 1,
+        },
+      ],
+      currency: [],
+      ready: false,
+    },
+    them: {
+      assets: [],
+      currency: [],
+      ready: false,
+    },
+  }),
+  captcha: "",
+  trade_offer_create_params: JSON.stringify({
+    trade_offer_access_token: tradeToken,
+  }),
+};
 
-// Login Route
-app.get('/login', (req, res) => {
-    relyingParty.authenticate(
-        'https://steamcommunity.com/openid',
-        false,
-        (error, authUrl) => {
-            if (error) {
-                return res.status(500).send('Authentication failed');
-            }
-            res.redirect(authUrl);
-        }
-    );
-});
+const headers = {
+  "Content-Type": "application/x-www-form-urlencoded",
+  Cookie: `sessionid=${sessionid}; steamLoginSecure=${steamLoginSecure}`,
+  Origin: "https://steamcommunity.com",
+  Referer: `https://steamcommunity.com/tradeoffer/new/?partner=1487904181`,
+};
 
-// Callback Route
-app.get('/callback', (req, res) => {
-    relyingParty.verifyAssertion(req, (error, result) => {
-        if (error || !result.authenticated) {
-            return res.status(500).send('Verification failed');
-        }
-
-        const steamId = result.claimedIdentifier.split('/').pop();
-        res.send(`${steamId}`);
-    });
-});
-
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+try {
+  const res = await axios.post(
+    "https://steamcommunity.com/tradeoffer/new/send",
+    qs.stringify(payload),
+    { headers }
+  );
+  console.log("✅ Trade Offer Response:", res.data);
+} catch (err) {
+  console.error(
+    "❌ Error sending trade offer:",
+    err.response?.data || err.message
+  );
+}
